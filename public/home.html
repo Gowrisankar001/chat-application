@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Home</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Chat Room</h2>
+        <div id="chatbox" class="chatbox">
+            <!-- Messages will be displayed here -->
+        </div>
+        <input type="text" id="messageInput" placeholder="Type your message here..." onkeypress="if(event.keyCode === 13) sendMessage()">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+    <script>
+        const username = prompt("Enter your username:"); // Simple way to get username for demo purposes
+
+        // Connect to WebSocket server
+        const socket = new WebSocket(`ws://${window.location.host}`);
+
+        socket.onmessage = function(event) {
+            const message = JSON.parse(event.data);
+            displayMessage(message);
+        };
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            if (message) {
+                const timestamp = formatTimestamp(new Date());
+                const messageData = { username, message, timestamp };
+                socket.send(JSON.stringify(messageData));
+                messageInput.value = ''; // Clear input field after sending
+            }
+        }
+
+        function displayMessage(messageData) {
+            const chatbox = document.getElementById('chatbox');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message';
+            messageElement.innerHTML = `
+                <div class="message-content">${messageData.message}</div>
+                <div class="message-info">
+                    <span class="username">${messageData.username}</span>
+                    <span class="timestamp">${messageData.timestamp}</span>
+                </div>`;
+            chatbox.appendChild(messageElement);
+            chatbox.scrollTop = chatbox.scrollHeight; // Scroll to the bottom
+        }
+
+        function formatTimestamp(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+            const year = String(date.getFullYear()).slice(-2);
+            return `${day}/${month}/${year}`;
+        }
+    </script>
+</body>
+</html>

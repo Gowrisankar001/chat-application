@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label>Username</label><br />
+            <input type="text" id="loginUsername" placeholder="Username" required><br />
+            <label>Password</label><br />
+            <input type="password" id="loginPassword" placeholder="Password" required><br />
+            <button type="submit">Login</button>
+            <p id="loginMessage"></p>
+        </form>
+        <p>Don't have an account? <a href="signup.html">Signup here</a></p>
+    </div>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var username = document.getElementById('loginUsername').value;
+            var password = document.getElementById('loginPassword').value;
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Login successful') {
+                    window.location.href = '/home'; // Redirect to home page
+                } else {
+                    document.getElementById('loginMessage').textContent = data.message;
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                document.getElementById('loginMessage').textContent = 'An error occurred. Please try again.';
+            });
+        });
+    </script>
+</body>
+</html>
